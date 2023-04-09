@@ -1,0 +1,6 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "/home/casper/Repositories/securities-tool/Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
+}
