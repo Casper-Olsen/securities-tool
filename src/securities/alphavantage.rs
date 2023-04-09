@@ -45,7 +45,7 @@ pub async fn get_security_price(security: &str) -> Result<String, reqwest::Error
 
     let response = reqwest::get(&request_url).await?;
 
-    let global_quote: Root = response.json().await?;
+    let root: Root = response.json().await?;
 
-    return Ok(global_quote.global_quote.price);
+    return Ok(root.global_quote.price);
 }
