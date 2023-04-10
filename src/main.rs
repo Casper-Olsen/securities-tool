@@ -3,7 +3,7 @@ pub mod securities;
 use colored::Colorize;
 use std::env;
 
-use crate::securities::commandline::commandline::get_security;
+use crate::securities::commandline::get_security;
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
