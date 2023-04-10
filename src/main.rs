@@ -23,8 +23,12 @@ async fn main() {
     let price_result = securities::alphavantage::get_security_price(&security).await;
     let price = match price_result {
         Ok(p) => p,
-        Err(error) => {
-            println!("Security not found: {}", error);
+        Err(r) => {
+            println!(
+                "Error getting price for {}: {}",
+                security.bold(),
+                r.message.red()
+            );
             return;
         }
     };
