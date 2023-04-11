@@ -27,7 +27,7 @@ async fn main() {
             println!(
                 "Error getting price for {}: {}",
                 security.bold(),
-                r.message.red()
+                r.to_string().red()
             );
             return;
         }

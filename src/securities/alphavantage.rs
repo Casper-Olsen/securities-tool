@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use std::{error::Error, fmt};
+use thiserror::Error;
 
 struct Query {
     function: String,
@@ -55,17 +55,14 @@ enum AlphaVantageResponse {
     QuoteNotFound(EmptyQuote),
 }
 
-#[derive(Debug)]
-pub struct RequestError {
-    pub message: String,
-}
-
-impl Error for RequestError {}
-
-impl fmt::Display for RequestError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Request error")
-    }
+#[derive(Error, Debug)]
+pub enum RequestError {
+    #[error("The request failed")]
+    RequestFailed(#[from] reqwest::Error),
+    #[error("{0}")]
+    LimitExceeded(String),
+    #[error("The security was not found")]
+    NotFound(),
 }
 
 pub async fn get_security_price(security: &str) -> Result<String, RequestError> {
@@ -74,31 +71,14 @@ pub async fn get_security_price(security: &str) -> Result<String, RequestError> 
 
     let request_url = query.request_url(security);
 
-    let response_result = reqwest::get(&request_url).await;
-    let response = match response_result {
-        Ok(r) => r,
-        Err(e) => {
-            return Err(RequestError {
-                message: e.to_string(),
-            })
-        }
-    };
+    // If Err(e): convert to RequestError and return
+    let response = reqwest::get(&request_url).await?;
 
-    let quote_returns_result = response.json::<AlphaVantageResponse>().await;
-    let quote_returns = match quote_returns_result {
-        Ok(q) => q,
-        Err(e) => {
-            return Err(RequestError {
-                message: e.to_string(),
-            })
-        }
-    };
+    let quote_returns = response.json::<AlphaVantageResponse>().await?;
 
     match quote_returns {
         AlphaVantageResponse::QuoteFound(r) => Ok(r.global_quote.price),
-        AlphaVantageResponse::RequestLimitExceeded(n) => Err(RequestError { message: n.note }),
-        _ => Err(RequestError {
-            message: "The security was not found".to_string(),
-        }),
+        AlphaVantageResponse::RequestLimitExceeded(n) => Err(RequestError::LimitExceeded(n.note)),
+        _ => Err(RequestError::NotFound()),
     }
 }
