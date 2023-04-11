@@ -66,13 +66,14 @@ pub enum RequestError {
 }
 
 pub async fn get_security_price(security: &str) -> Result<String, RequestError> {
-    let mut query = Query::default();
-    query.function = String::from("GLOBAL_QUOTE");
+    let query = Query {
+        function: String::from("GLOBAL_QUOTE"),
+        ..Default::default() // Override 'function', but still retain the other defaults
+    };
 
     let request_url = query.request_url(security);
 
-    // If Err(e): convert to RequestError and return
-    let response = reqwest::get(&request_url).await?;
+    let response = reqwest::get(&request_url).await?; // If Err(e): convert to RequestError and return
 
     let quote_returns = response.json::<AlphaVantageResponse>().await?;
 
