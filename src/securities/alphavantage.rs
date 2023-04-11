@@ -62,7 +62,7 @@ pub enum RequestError {
     #[error("{0}")]
     LimitExceeded(String),
     #[error("The security was not found")]
-    NotFound(),
+    NotFound,
 }
 
 pub async fn get_security_price(security: &str) -> Result<String, RequestError> {
@@ -80,6 +80,6 @@ pub async fn get_security_price(security: &str) -> Result<String, RequestError> 
     match quote_returns {
         AlphaVantageResponse::QuoteFound(r) => Ok(r.global_quote.price),
         AlphaVantageResponse::RequestLimitExceeded(n) => Err(RequestError::LimitExceeded(n.note)),
-        _ => Err(RequestError::NotFound()),
+        _ => Err(RequestError::NotFound),
     }
 }
